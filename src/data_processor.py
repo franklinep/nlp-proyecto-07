@@ -3,6 +3,7 @@ import re
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
+import pickle
 
 def segment_cases(full_text):
     """
@@ -49,3 +50,12 @@ if __name__ == "__main__":
     # ahora vamos a crear el iindice faiss, usando la clase IndexFlatL2
     index = faiss.IndexFlatL2(len(patient_cases_embeddings[0]))  # L2 distance
     index.add(patient_cases_embeddings)
+    # ahora guardamos el indice
+    faiss.write_index(index, "patient_cases.index")
+    # guardamos la lista de casos patient_cases, en el formato pickle
+    with open("patient_cases.pkl", "wb") as f:
+        pickle.dump(patient_cases, f)
+    f.close()
+
+
+
