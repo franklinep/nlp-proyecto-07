@@ -40,20 +40,22 @@ def embedding_encode(arr, model):
 
 
 if __name__ == "__main__":
-    file_path = "./data/Casos.docx"
+    file_path = "../data/Casos.docx"
 
     clinical_text = extract_text_from_docx(file_path)
 
     patient_cases = segment_cases(clinical_text)
     model = SentenceTransformer("all-mpnet-base-v2") # cargamos el modelo preentrenado embedding
     patient_cases_embeddings = embedding_encode(patient_cases, model) # salida: shape [30, 786] -> 786 es el tamaño del embedding
+    print("Tamaño del embedding:", patient_cases_embeddings.shape)
     # ahora vamos a crear el iindice faiss, usando la clase IndexFlatL2
     index = faiss.IndexFlatL2(patient_cases_embeddings.shape[1])  # L2 distance
     index.add(patient_cases_embeddings)
+    print("Tamaño del indice:", index.ntotal)
     # ahora guardamos el indice
-    faiss.write_index(index, "patient_cases.index")
+    faiss.write_index(index, "../models/patient_cases.index")
     # guardamos la lista de casos patient_cases, en el formato pickle
-    with open("patient_cases.pkl", "wb") as f:
+    with open("../models/patient_cases.pkl", "wb") as f:
         pickle.dump(patient_cases, f)
     f.close()
 
