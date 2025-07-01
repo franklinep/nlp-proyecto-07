@@ -48,7 +48,7 @@ if __name__ == "__main__":
     model = SentenceTransformer("all-mpnet-base-v2") # cargamos el modelo preentrenado embedding
     patient_cases_embeddings = embedding_encode(patient_cases, model) # salida: shape [30, 786] -> 786 es el tamaño del embedding
     # ahora vamos a crear el iindice faiss, usando la clase IndexFlatL2
-    index = faiss.IndexFlatL2(len(patient_cases_embeddings[0]))  # L2 distance
+    index = faiss.IndexFlatL2(patient_cases_embeddings.shape[1])  # L2 distance
     index.add(patient_cases_embeddings)
     # ahora guardamos el indice
     faiss.write_index(index, "patient_cases.index")
