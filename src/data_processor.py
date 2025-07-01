@@ -1,6 +1,8 @@
 from data_extractor import extract_text_from_docx
 import re
 from sentence_transformers import SentenceTransformer
+import faiss
+import numpy as np
 
 def segment_cases(full_text):
     """
@@ -32,7 +34,7 @@ def segment_cases(full_text):
 def embedding_encode(arr, model):
     passage_embeddings = model.encode(arr)
     # tensor -> numpy array
-    passage_embeddings = passage_embeddings.tolist()
+    passage_embeddings = np.array(passage_embeddings).astype('float32')  # Convertimos a float32 para FAISS
     return passage_embeddings
 
 
@@ -43,16 +45,7 @@ if __name__ == "__main__":
 
     patient_cases = segment_cases(clinical_text)
     model = SentenceTransformer("all-mpnet-base-v2") # cargamos el modelo preentrenado embedding
-    patient_cases_embeddings = embedding_encode(patient_cases, model) # obtenemos los embeddings de los casos
-    # salida: shape [30, 786] -> 786 es el tamaño del embedding
-    print(f"Shape of patient_cases_embeddings: {len(patient_cases_embeddings)} x {len(patient_cases_embeddings[0])}")
-
-    # print(f"Se han encontrado y procesado {len(patient_cases)} casos de pacientes.")
-    # print("-" * 20)
-
-    # if len(patient_cases) > 0:
-    #   print("\n--- Muestra del Caso 1 ---")
-    #   print(patient_cases[0])
-    # if len(patient_cases) > 1:
-    #   print("\n--- Muestra del Caso 2 ---")
-    #   print(patient_cases[1])
+    patient_cases_embeddings = embedding_encode(patient_cases, model) # salida: shape [30, 786] -> 786 es el tamaño del embedding
+    # ahora vamos a crear el iindice faiss, usando la clase IndexFlatL2
+    index = faiss.IndexFlatL2(len(patient_cases_embeddings[0]))  # L2 distance
+    index.add(patient_cases_embeddings)
