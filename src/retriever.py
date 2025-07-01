@@ -4,10 +4,13 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 
 class Retriever:
-    def __init__(self, index, patient_cases, model):
-        self.index = index
-        self.patient_cases = patient_cases
-        self.model = model
+    def __init__(self, index_path, cases_path, model_name):
+        print("Cargando Retriever...")
+        self.index = faiss.read_index(index_path)
+        with open(cases_path, "rb") as f:
+            self.patient_cases = pickle.load(f)
+        self.model = SentenceTransformer(model_name)
+        print("Retriever listo.")
 
     def search(self, query, top_k=5):
         query_embedding = self.model.encode(query)
@@ -19,16 +22,13 @@ class Retriever:
                 results.append(self.patient_cases[idx])
         return results
 
-# lo ponemos a prueba
 if __name__ == "__main__":
-    # cargamos el índice FAISS, los casos de pacientes y el modelo
-    index = faiss.read_index("patient_cases.index")
-    with open("patient_cases.pkl", "rb") as f:
-        patient_cases = pickle.load(f)
-    model = SentenceTransformer("all-mpnet-base-v2")
-    # creamos una instancia del Retriever y realizar una búsqueda
-    retriever = Retriever(index, patient_cases, model)
     query = "paciente con ansiedad por no encontrar trabajo"
+    retriever = Retriever(
+        index_path="../models/patient_cases.index",
+        cases_path="../models/patient_cases.pkl",
+        model_name="all-mpnet-base-v2"
+    )
     results = retriever.search(query)
 
     for result in results:
