@@ -26,7 +26,11 @@ prompt = ChatPromptTemplate.from_template(prompt_template_str)
 
 chain = prompt | llm | StrOutputParser()
 
-retriever = Retriever()
+retriever = Retriever(
+        index_path="./models/patient_cases.index",
+        cases_path="./models/patient_cases.pkl",
+        model_name="all-mpnet-base-v2"
+    )
 query = "¿Qué es la ansiedad y cómo se relaciona con la búsqueda de empleo?"
 print(f"Pregunta del usuario: {query}\n")
 
