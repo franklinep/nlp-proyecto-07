@@ -2,12 +2,13 @@ from retriever import Retriever
 from llm_generator import configure_llm, generate_test_answer
 from prompt_manager import create_rag_prompt_template, format_prompt
 
-def run_rag_pipeline(question, top_k=5):
+def run_rag_pipeline(question, retriever, top_k=5):
     """
     Ejecuta el pipeline completo de RAG.
     
     Args:
         question (str): La pregunta del usuario.
+        retriever (Retriever): El retriever a usar.
         top_k (int): El número de casos a recuperar como contexto.
 
     Returns:
@@ -17,11 +18,7 @@ def run_rag_pipeline(question, top_k=5):
 
     # 1. RETRIEVE
     print(f"1. Buscando los {top_k} casos más relevantes para: '{question}'")
-    retriever = Retriever(
-        index_path="../models/patient_cases.index",
-        cases_path="../models/patient_cases.pkl",
-        model_name="all-mpnet-base-v2"
-    )
+
     retrieved_cases = retriever.search(query=question, top_k=top_k)
     
     contexto = "\n\n---\n\n".join(retrieved_cases)
@@ -42,10 +39,24 @@ def run_rag_pipeline(question, top_k=5):
 if __name__ == "__main__":
     configure_llm()
     
-    user_question = "¿Qué tratamiento se le puede dar a una paciente que no tiene ganas de hacer nada en la universidad?"
+    retriever = Retriever(
+        index_path="../models/patient_cases.index",
+        cases_path="../models/patient_cases.pkl",
+        model_name="all-mpnet-base-v2"
+    )
+
+    print("\n¡Bienvenido al Asistente de Historiales Clínicos!")
+    print("Puedes hacer preguntas sobre los pacientes. Escribe 'salir' para terminar.")
     
-    answer = run_rag_pipeline(user_question)
-    
-    print("\n========= RESPUESTA DEL ASISTENTE =========\n")
-    print(answer)
-    print("\n===========================================\n")
+    while True:
+        user_question = input("\n>Pregunta: ")
+        
+        if user_question.lower() in ["salir", "exit", "quit"]:
+            print("Gracias por usar el asistente. ¡Hasta luego!")
+            break
+            
+        answer = run_rag_pipeline(user_question, retriever)
+        
+        print("\n========= RESPUESTA DEL ASISTENTE =========\n")
+        print(answer)
+        print("\n===========================================\n")
