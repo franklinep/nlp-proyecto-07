@@ -1,5 +1,5 @@
 # =================================================================
-#  1. IMPORTACIONES Y CONFIGURACIÓN INICIAL
+#  IMPORTACIONES Y CONFIGURACIÓN INICIAL
 # =================================================================
 import os
 import uuid
@@ -113,7 +113,7 @@ workflow.add_node("retrieve", retrieve_context_node)
 workflow.add_node("generate", generate_answer_node)
 
 # Definimos el flujo de ejecución.
-workflow.set_entry_point("retrieve")
+workflow.add_edge(START, "retrieve")
 workflow.add_edge("retrieve", "generate")
 workflow.add_edge("generate", END)
 
